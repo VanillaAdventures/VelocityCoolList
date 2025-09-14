@@ -53,6 +53,13 @@ public class VelocityCoolList {
         new Config(this).init();
         new Whitelist(this).init();
 
+        // Регистрируем обработчик событий LimboAPI с высоким приоритетом
+        // только если интеграция включена в конфигурации
+        if (Config.getInstance().getBoolean("limbo_integration")) {
+            PROXY.getEventManager().register(this, new LimboWhitelistHandler(this));
+            LOGGER.info("LimboAPI integration enabled - whitelist check will have highest priority");
+        }
+
         CommandManager commandManager = PROXY.getCommandManager();
 
         CommandMeta commandMeta = commandManager.metaBuilder("vclist")
@@ -70,7 +77,7 @@ public class VelocityCoolList {
         });
     }
 
-    @Subscribe(priority = 30000)
+    @Subscribe(priority = 1000) // Низкий приоритет - работает как резервный обработчик
     private void onPlayerJoin(ServerPreConnectEvent event) {
         if (!Config.getInstance().getBoolean("enabled")) return;
         Player player = event.getPlayer();

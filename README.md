@@ -3,6 +3,24 @@
 
 VelocityCoolList is a simple and easy-to-use plugin for Minecraft Velocity servers that allows you to create a whitelist based on nicknames.
 
+## LimboAPI Integration
+Starting from version 2.1.0, VelocityCoolList includes integration with LimboAPI to ensure whitelist checks happen before LimboAuth teleportation events. This prevents players from being teleported to limbo before whitelist verification.
+
+### Configuration
+The integration can be controlled via the `limbo_integration` setting in `config.yml`:
+```yaml
+# LimboAPI integration - проверка вайтлиста с высоким приоритетом
+# для предотвращения телепортации в LimboAuth до проверки вайтлиста
+limbo_integration: true
+```
+
+When enabled, the plugin will:
+- Register high-priority event handlers for `LoginEvent` with priority 100000
+- Check whitelist status before any LimboAPI events can process
+- Prevent unauthorized players from being teleported to limbo servers
+
+This ensures that whitelist verification always happens first, regardless of the order in which LimboAPI and LimboAuth plugins are loaded.
+
 ## Commands and permissions
 The main command is ```/vclist```, it shows you information about VelocityCoolList, below are its arguments:
 | Argument| Description                               | Permission    |

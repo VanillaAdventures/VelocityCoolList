@@ -3,7 +3,7 @@ plugins {
     id 'eclipse'
     id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1"
     id "xyz.jpenilla.run-velocity" version "2.3.1"
-    id 'com.gradleup.shadow' version '9.0.0-rc1'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'com.atikinbtw'
@@ -19,6 +19,10 @@ repositories {
         name = 'jitpack'
         url = 'https://jitpack.io'
     }
+    maven {
+        name = 'elytrium-repo'
+        url = 'https://maven.elytrium.net/repo/'
+    }
 }
 
 dependencies {
@@ -27,6 +31,9 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // LimboAPI dependency
+    compileOnly 'net.elytrium.limboapi:api:1.1.26'
 
     implementation 'com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4'
 }

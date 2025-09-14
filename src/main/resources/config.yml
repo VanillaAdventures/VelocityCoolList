@@ -11,5 +11,9 @@ prefix: "<gradient:#5e4fa2:#f79459>VelocityCoolList</gradient> <red><bold>>>></r
 # Toggle for the clear command
 enable_clear_command: false
 
+# LimboAPI integration - проверка вайтлиста с высоким приоритетом
+# для предотвращения телепортации в LimboAuth до проверки вайтлиста
+limbo_integration: true
+
 # Do not touch
 config_version: 2
