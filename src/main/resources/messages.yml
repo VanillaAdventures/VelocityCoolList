@@ -41,3 +41,31 @@ clear_disabled: "<red>Clear command is disabled! You can enable it in the config
 ### Allowed placeholders: $SOURCE
 reload: "<dark_purple>Whitelist reloaded!"
 reload_error: "<red>An error occurred while reloading the plugin, check the console for details."
+
+# Discord Integration Messages
+# Available placeholders: $USERNAME, $USER
+discord:
+  # Success messages
+  success:
+    whitelist_add: "✅ Игрок `$USERNAME` добавлен в вайтлист!"
+    whitelist_remove: "✅ Игрок `$USERNAME` удален из вайтлиста!"
+  
+  # Warning messages
+  warning:
+    already_whitelisted: "⚠️ Игрок `$USERNAME` уже находится в вайтлисте!"
+    not_whitelisted: "⚠️ Игрок `$USERNAME` не находится в вайтлисте!"
+  
+  # Error messages
+  error:
+    no_permission: "❌ У вас нет прав для выполнения этой команды!"
+    unknown_command: "❌ Неизвестная команда!"
+    execution_error: "❌ Произошла ошибка при выполнении операции!"
+    add_failed: "❌ Не удалось добавить игрока `$USERNAME` в вайтлист!"
+    remove_failed: "❌ Не удалось удалить игрока `$USERNAME` из вайтлиста!"
+  
+  # Logging messages
+  logging:
+    user_added: "Пользователь $USER добавил $USERNAME в вайтлист"
+    user_removed: "Пользователь $USER удалил $USERNAME из вайтлиста"
+    user_already_whitelisted: "Пользователь $USER попытался добавить $USERNAME, но он уже в вайтлисте"
+    user_not_whitelisted: "Пользователь $USER попытался удалить $USERNAME, но его нет в вайтлисте"

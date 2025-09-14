@@ -1,6 +1,7 @@
 package com.atikinbtw.velocitycoollist;
 
 import com.atikinbtw.velocitycoollist.commands.MainCommand;
+import com.atikinbtw.velocitycoollist.discord.DiscordModule;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
@@ -8,13 +9,17 @@ import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.simpleyaml.configuration.file.YamlFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +44,7 @@ public class VelocityCoolList {
     public static Logger LOGGER = LoggerFactory.getLogger("VelocityCoolList-TEMP");
     public final Path DATADIRECTORY;
     private final ProxyServer PROXY;
+    private DiscordModule discordModule;
 
     @Inject
     public VelocityCoolList(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
@@ -69,6 +75,24 @@ public class VelocityCoolList {
 
         BrigadierCommand commandToRegister = MainCommand.createBrigadierCommand(PROXY);
         commandManager.register(commandMeta, commandToRegister);
+
+        // Инициализация Discord модуля
+        if (Config.getInstance().getBoolean("discord.enabled")) {
+            try {
+                String token = Config.getInstance().getString("discord.token");
+                String guildId = Config.getInstance().getString("discord.guild_id");
+                List<String> allowedUsers = Config.getInstance().getStringList("discord.allowed_users");
+                
+                if (token != null && !token.equals("YOUR_DISCORD_BOT_TOKEN") && 
+                    guildId != null && !guildId.equals("YOUR_GUILD_ID")) {
+                    this.discordModule = new DiscordModule(this, token, guildId, allowedUsers);
+                } else {
+                    LOGGER.warn("Discord интеграция включена, но токен или ID сервера не настроены!");
+                }
+            } catch (Exception e) {
+                LOGGER.error("Ошибка при инициализации Discord модуля: " + e.getMessage(), e);
+            }
+        }
 
         LOGGER.info("VelocityCoolList has been enabled! Took {}ms", System.currentTimeMillis() - startTime.getTime());
         scheduleTask(() -> {
@@ -120,6 +144,22 @@ public class VelocityCoolList {
         });
 
         scheduleTask(task);
+    }
+
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        try {
+            LOGGER.info("Отключение плагина VelocityCoolList...");
+            
+            if (discordModule != null) {
+                discordModule.shutdown();
+            }
+            
+            LOGGER.info("Плагин VelocityCoolList успешно отключен!");
+            
+        } catch (Exception e) {
+            LOGGER.error("Ошибка при отключении плагина: " + e.getMessage(), e);
+        }
     }
 
     public void scheduleTask(Runnable runnable) {

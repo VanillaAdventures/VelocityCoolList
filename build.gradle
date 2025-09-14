@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.atikinbtw'
-version = '2.1.0-SNAPSHOT'
+version = '3.0.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -36,6 +36,9 @@ dependencies {
     compileOnly 'net.elytrium.limboapi:api:1.1.26'
 
     implementation 'com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4'
+    
+    // Discord JDA
+    implementation 'net.dv8tion:JDA:5.0.0-beta.15'
 }
 
 def targetJavaVersion = 17
@@ -81,6 +84,7 @@ shadowJar {
 
     dependencies {
         include(dependency("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4"))
+        include(dependency("net.dv8tion:JDA:5.0.0-beta.15"))
     }
 }
 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public final class Config {
     private static Config INSTANCE;
@@ -78,6 +79,15 @@ public final class Config {
 
     public String getMessage(String key) {
         return messages.getString(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getStringList(String key) {
+        return (List<String>) config.getList(key);
+    }
+
+    public VelocityCoolList getPlugin() {
+        return plugin;
     }
 
     public void init() {

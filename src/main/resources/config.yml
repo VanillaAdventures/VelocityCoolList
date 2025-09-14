@@ -15,5 +15,21 @@ enable_clear_command: false
 # для предотвращения телепортации в LimboAuth до проверки вайтлиста
 limbo_integration: true
 
+# Discord настройки
+discord:
+  # Включить Discord интеграцию
+  enabled: false
+  
+  # Токен бота Discord
+  token: "YOUR_DISCORD_BOT_TOKEN"
+  
+  # ID сервера Discord
+  guild_id: "YOUR_GUILD_ID"
+  
+  # Разрешенные пользователи (по ID)
+  allowed_users:
+    - "123456789012345678"
+    - "987654321098765432"
+
 # Do not touch
 config_version: 2

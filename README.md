@@ -3,6 +3,31 @@
 
 VelocityCoolList is a simple and easy-to-use plugin for Minecraft Velocity servers that allows you to create a whitelist based on nicknames.
 
+## Discord Integration
+Starting from version 3.0.0, VelocityCoolList includes Discord integration that allows you to manage the whitelist directly from Discord using slash commands.
+
+### Discord Commands
+- `/whitelist-add <username>` - Add player to whitelist
+- `/whitelist-remove <username>` - Remove player from whitelist
+
+### Discord Configuration
+Enable Discord integration in `config.yml`:
+```yaml
+discord:
+  enabled: true
+  token: "YOUR_DISCORD_BOT_TOKEN"
+  guild_id: "YOUR_GUILD_ID"
+  allowed_users:
+    - "123456789012345678"
+    - "987654321098765432"
+```
+
+### Setup
+1. Create a Discord bot in [Discord Developer Portal](https://discord.com/developers/applications)
+2. Get bot token and guild ID
+3. Add bot to your server with `applications.commands` permission
+4. Configure the plugin and restart
+
 ## LimboAPI Integration
 Starting from version 2.1.0, VelocityCoolList includes integration with LimboAPI to ensure whitelist checks happen before LimboAuth teleportation events. This prevents players from being teleported to limbo before whitelist verification.
 
