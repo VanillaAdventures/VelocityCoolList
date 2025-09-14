@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Whitelist {
@@ -15,7 +16,7 @@ public class Whitelist {
     private final VelocityCoolList plugin;
     private final Path whitelistPath;
     @Getter
-    private List<String> whitelist = List.of();
+    private List<String> whitelist = new ArrayList<>();
 
     public Whitelist(VelocityCoolList plugin) {
         this.plugin = plugin;
@@ -59,15 +60,26 @@ public class Whitelist {
     }
 
     public void removePlayer(String nickname) {
-        this.whitelist.remove(nickname);
+        // Ищем и удаляем игрока независимо от регистра
+        String lowercaseNickname = nickname.toLowerCase();
+        this.whitelist.removeIf(player -> player.toLowerCase().equals(lowercaseNickname));
     }
 
     public void addPlayer(String nickname) {
-        this.whitelist.add(nickname);
+        // Проверяем, нет ли уже игрока с таким именем (независимо от регистра)
+        String lowercaseNickname = nickname.toLowerCase();
+        boolean alreadyExists = this.whitelist.stream()
+                .anyMatch(player -> player.toLowerCase().equals(lowercaseNickname));
+        
+        if (!alreadyExists) {
+            this.whitelist.add(nickname); // Сохраняем оригинальный регистр
+        }
     }
 
     public boolean contains(String nickname) {
-        return whitelist.contains(nickname);
+        String lowercaseNickname = nickname.toLowerCase();
+        return whitelist.stream()
+                .anyMatch(player -> player.toLowerCase().equals(lowercaseNickname));
     }
 
     public void saveFile() {
