@@ -50,7 +50,7 @@ public class Whitelist {
         }
     }
 
-    public Boolean isWhitelistEmpty() {
+    public boolean isWhitelistEmpty() {
         return whitelist.isEmpty();
     }
 
@@ -66,17 +66,15 @@ public class Whitelist {
         this.whitelist.add(nickname);
     }
 
-    public Boolean contains(String nickname) {
+    public boolean contains(String nickname) {
         return whitelist.contains(nickname);
     }
 
     public void saveFile() {
         plugin.scheduleTask(() -> {
             try {
-                Gson gson = new Gson();
-                String json = gson.toJson(whitelist);
-
-                Files.writeString(Path.of(plugin.DATADIRECTORY + "/whitelist.json"), json);
+                String json = new Gson().toJson(whitelist);
+                Files.writeString(whitelistPath, json);
             } catch (IOException e) {
                 VelocityCoolList.LOGGER.error("Error happened while saving whitelist.json: ", e);
             }

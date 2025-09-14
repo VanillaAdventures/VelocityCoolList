@@ -15,7 +15,6 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.simpleyaml.configuration.file.YamlFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

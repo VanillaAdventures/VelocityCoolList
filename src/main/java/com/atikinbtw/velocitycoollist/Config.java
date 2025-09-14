@@ -47,7 +47,6 @@ public final class Config {
 
     public void setAndSave(String key, Object value) {
         config.set(key, value);
-
         saveConfigFile();
     }
 
@@ -60,10 +59,11 @@ public final class Config {
             try {
                 messages.save();
             } catch (IOException e) {
-                VelocityCoolList.LOGGER.error("Error happened while saving the config.yml: ", e);
+                VelocityCoolList.LOGGER.error("Error happened while saving messages.yml: ", e);
             }
         });
     }
+
 
     public String getString(String key) {
         return config.getString(key);
@@ -79,6 +79,10 @@ public final class Config {
 
     public String getMessage(String key) {
         return messages.getString(key);
+    }
+    
+    public YamlFile getMessages() {
+        return messages;
     }
 
     @SuppressWarnings("unchecked")
