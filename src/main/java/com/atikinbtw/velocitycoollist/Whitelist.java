@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class Whitelist {
     private static Whitelist INSTANCE;
@@ -39,11 +38,8 @@ public class Whitelist {
     }
 
     public void reload() {
-        repository.refreshCache();
-        // Обновляем кеш для обратной совместимости
-        repository.getAllPlayers().thenAccept(players -> {
-            this.whitelist = players;
-        });
+        // Обновляем локальный список для обратной совместимости
+        this.whitelist = repository.getAllPlayers();
     }
 
     private void loadWhitelist() {
@@ -68,36 +64,30 @@ public class Whitelist {
     }
 
     public void clear() {
-        repository.clear().thenAccept(success -> {
-            if (success) {
-                this.whitelist.clear();
-            }
-        });
+        if (repository.clear()) {
+            this.whitelist.clear();
+        }
     }
 
     public void removePlayer(String nickname) {
-        repository.removePlayer(nickname).thenAccept(success -> {
-            if (success) {
-                // Обновляем локальный кеш для обратной совместимости
-                String lowercaseNickname = nickname.toLowerCase();
-                this.whitelist.removeIf(player -> player.toLowerCase().equals(lowercaseNickname));
-            }
-        });
+        if (repository.removePlayer(nickname)) {
+            // Обновляем локальный список для обратной совместимости
+            String lowercaseNickname = nickname.toLowerCase();
+            this.whitelist.removeIf(player -> player.toLowerCase().equals(lowercaseNickname));
+        }
     }
 
     public void addPlayer(String nickname) {
-        repository.addPlayer(nickname).thenAccept(success -> {
-            if (success) {
-                // Обновляем локальный кеш для обратной совместимости
-                String lowercaseNickname = nickname.toLowerCase();
-                boolean alreadyExists = this.whitelist.stream()
-                        .anyMatch(player -> player.toLowerCase().equals(lowercaseNickname));
-                
-                if (!alreadyExists) {
-                    this.whitelist.add(nickname);
-                }
+        if (repository.addPlayer(nickname)) {
+            // Обновляем локальный список для обратной совместимости
+            String lowercaseNickname = nickname.toLowerCase();
+            boolean alreadyExists = this.whitelist.stream()
+                    .anyMatch(player -> player.toLowerCase().equals(lowercaseNickname));
+            
+            if (!alreadyExists) {
+                this.whitelist.add(nickname);
             }
-        });
+        }
     }
 
     public boolean contains(String nickname) {
@@ -130,11 +120,9 @@ public class Whitelist {
             migrateFromJson();
         }
         
-        // Обновляем локальный кеш для обратной совместимости
-        repository.getAllPlayers().thenAccept(players -> {
-            this.whitelist = players;
-            VelocityCoolList.LOGGER.info("Whitelist загружен: {} игроков", players.size());
-        });
+        // Обновляем локальный список для обратной совместимости
+        this.whitelist = repository.getAllPlayers();
+        VelocityCoolList.LOGGER.info("Whitelist загружен: {} игроков", whitelist.size());
     }
     
     private void migrateFromJson() {
@@ -145,24 +133,23 @@ public class Whitelist {
                 VelocityCoolList.LOGGER.info("Миграция {} игроков из JSON в базу данных...", whitelist.size());
                 
                 // Добавляем всех игроков в базу данных
-                @SuppressWarnings("unchecked")
-                CompletableFuture<Boolean>[] futures = whitelist.stream()
-                        .map(player -> repository.addPlayer(player))
-                        .toArray(CompletableFuture[]::new);
-                
-                CompletableFuture.allOf(futures).thenRun(() -> {
-                    try {
-                        // Создаем бэкап старого файла
-                        Path backupPath = plugin.DATADIRECTORY.resolve("whitelist.json.backup");
-                        Files.move(whitelistPath, backupPath);
-                        VelocityCoolList.LOGGER.info("Миграция завершена успешно. Старый файл сохранен как whitelist.json.backup");
-                    } catch (IOException e) {
-                        VelocityCoolList.LOGGER.error("Ошибка при создании бэкапа JSON файла: ", e);
+                int migrated = 0;
+                for (String player : whitelist) {
+                    if (repository.addPlayer(player)) {
+                        migrated++;
                     }
-                }).exceptionally(throwable -> {
-                    VelocityCoolList.LOGGER.error("Ошибка при миграции whitelist: ", throwable);
-                    return null;
-                });
+                }
+                
+                VelocityCoolList.LOGGER.info("Перенесено {} из {} игроков", migrated, whitelist.size());
+                
+                try {
+                    // Создаем бэкап старого файла
+                    Path backupPath = plugin.DATADIRECTORY.resolve("whitelist.json.backup");
+                    Files.move(whitelistPath, backupPath);
+                    VelocityCoolList.LOGGER.info("Миграция завершена успешно. Старый файл сохранен как whitelist.json.backup");
+                } catch (IOException e) {
+                    VelocityCoolList.LOGGER.error("Ошибка при создании бэкапа JSON файла: ", e);
+                }
             }
         } catch (Exception e) {
             VelocityCoolList.LOGGER.error("Ошибка при миграции из JSON: ", e);

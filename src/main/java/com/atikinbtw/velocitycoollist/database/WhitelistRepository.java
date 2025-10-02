@@ -1,17 +1,12 @@
 package com.atikinbtw.velocitycoollist.database;
 
 import com.atikinbtw.velocitycoollist.VelocityCoolList;
-import lombok.Getter;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class WhitelistRepository {
     private static WhitelistRepository INSTANCE;
     private final DatabaseManager databaseManager;
-    
-    @Getter
-    private List<String> cachedWhitelist;
     
     public WhitelistRepository(VelocityCoolList plugin) {
         this.databaseManager = new DatabaseManager(plugin);
@@ -27,82 +22,64 @@ public class WhitelistRepository {
     
     public void initialize() {
         databaseManager.initialize();
-        refreshCache();
-    }
-    
-    public void refreshCache() {
-        databaseManager.getAllPlayers().thenAccept(players -> {
-            this.cachedWhitelist = players;
-            VelocityCoolList.LOGGER.debug("Кеш whitelist обновлен, загружено {} игроков", players.size());
-        }).exceptionally(throwable -> {
-            VelocityCoolList.LOGGER.error("Ошибка при обновлении кеша whitelist: ", throwable);
-            return null;
-        });
     }
     
     public boolean contains(String username) {
-        if (cachedWhitelist == null) {
-            // Если кеш еще не загружен, делаем синхронный запрос
-            try {
-                return databaseManager.containsPlayer(username).get();
-            } catch (Exception e) {
-                VelocityCoolList.LOGGER.error("Ошибка при синхронной проверке игрока: ", e);
-                return false;
-            }
+        try {
+            return databaseManager.containsPlayer(username).get();
+        } catch (Exception e) {
+            VelocityCoolList.LOGGER.error("Ошибка при проверке игрока в whitelist: ", e);
+            return false;
         }
-        
-        // Используем кеш для быстрой проверки (case-insensitive)
-        String lowercaseUsername = username.toLowerCase();
-        return cachedWhitelist.stream()
-                .anyMatch(player -> player.toLowerCase().equals(lowercaseUsername));
     }
     
-    public CompletableFuture<Boolean> addPlayer(String username) {
-        return databaseManager.addPlayer(username).thenApply(success -> {
-            if (success) {
-                refreshCache();
-            }
-            return success;
-        });
+    public boolean addPlayer(String username) {
+        try {
+            return databaseManager.addPlayer(username).get();
+        } catch (Exception e) {
+            VelocityCoolList.LOGGER.error("Ошибка при добавлении игрока в whitelist: ", e);
+            return false;
+        }
     }
     
-    public CompletableFuture<Boolean> removePlayer(String username) {
-        return databaseManager.removePlayer(username).thenApply(success -> {
-            if (success) {
-                refreshCache();
-            }
-            return success;
-        });
+    public boolean removePlayer(String username) {
+        try {
+            return databaseManager.removePlayer(username).get();
+        } catch (Exception e) {
+            VelocityCoolList.LOGGER.error("Ошибка при удалении игрока из whitelist: ", e);
+            return false;
+        }
     }
     
-    public CompletableFuture<List<String>> getAllPlayers() {
-        return databaseManager.getAllPlayers();
+    public List<String> getAllPlayers() {
+        try {
+            return databaseManager.getAllPlayers().get();
+        } catch (Exception e) {
+            VelocityCoolList.LOGGER.error("Ошибка при получении списка игроков: ", e);
+            return List.of();
+        }
     }
     
-    public CompletableFuture<Boolean> clear() {
-        return databaseManager.clearWhitelist().thenApply(success -> {
-            if (success) {
-                refreshCache();
-            }
-            return success;
-        });
+    public boolean clear() {
+        try {
+            return databaseManager.clearWhitelist().get();
+        } catch (Exception e) {
+            VelocityCoolList.LOGGER.error("Ошибка при очистке whitelist: ", e);
+            return false;
+        }
     }
     
     public boolean isEmpty() {
-        if (cachedWhitelist == null) {
-            try {
-                return databaseManager.isEmpty().get();
-            } catch (Exception e) {
-                VelocityCoolList.LOGGER.error("Ошибка при синхронной проверке пустоты: ", e);
-                return true;
-            }
+        try {
+            return databaseManager.isEmpty().get();
+        } catch (Exception e) {
+            VelocityCoolList.LOGGER.error("Ошибка при проверке пустоты whitelist: ", e);
+            return true;
         }
-        
-        return cachedWhitelist.isEmpty();
     }
     
     public List<String> getWhitelist() {
-        return cachedWhitelist;
+        return getAllPlayers();
     }
     
     public void shutdown() {
