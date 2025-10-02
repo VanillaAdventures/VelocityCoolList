@@ -154,6 +154,11 @@ public class VelocityCoolList {
                 discordModule.shutdown();
             }
             
+            // Отключаем базу данных
+            if (Whitelist.getInstance() != null) {
+                Whitelist.getInstance().shutdown();
+            }
+            
             LOGGER.info("Плагин VelocityCoolList успешно отключен!");
             
         } catch (Exception e) {

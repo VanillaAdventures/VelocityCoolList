@@ -31,5 +31,18 @@ discord:
     - "123456789012345678"
     - "987654321098765432"
 
+# Настройки базы данных
+database:
+  # Тип базы данных: sqlite или mysql
+  type: "sqlite"
+  
+  # Настройки MySQL (используются только при type: mysql)
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "velocitycoollist"
+    username: "root"
+    password: "password"
+
 # Do not touch
-config_version: 2
+config_version: 3

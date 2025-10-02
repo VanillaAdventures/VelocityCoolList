@@ -27,7 +27,8 @@ public class Migration {
 
         switch (config.getInt("config_version")) {
             case 1 -> firstToSecondVerMigration();
-            case 2 -> {
+            case 2 -> secondToThirdVerMigration();
+            case 3 -> {
             }
             default -> VelocityCoolList.LOGGER.error("Unknown config version: {}", config.getInt("config_version"));
         }
@@ -93,6 +94,28 @@ public class Migration {
             config.reload();
 
             VelocityCoolList.LOGGER.info("Migration completed!");
+        });
+    }
+    
+    private void secondToThirdVerMigration() {
+        plugin.scheduleTask(() -> {
+            VelocityCoolList.LOGGER.info("Миграция конфигурации с версии 2 на версию 3...");
+            
+            // Добавляем настройки базы данных
+            configFile.set("database.type", "sqlite");
+            configFile.set("database.mysql.host", "localhost");
+            configFile.set("database.mysql.port", 3306);
+            configFile.set("database.mysql.database", "velocitycoollist");
+            configFile.set("database.mysql.username", "root");
+            configFile.set("database.mysql.password", "password");
+            
+            // Обновляем версию конфигурации
+            configFile.set("config_version", 3);
+            
+            config.saveConfigFile();
+            config.reload();
+            
+            VelocityCoolList.LOGGER.info("Миграция конфигурации завершена!");
         });
     }
 }
