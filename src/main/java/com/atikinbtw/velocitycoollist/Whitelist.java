@@ -3,7 +3,6 @@ package com.atikinbtw.velocitycoollist;
 import com.atikinbtw.velocitycoollist.database.WhitelistRepository;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import lombok.Getter;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,8 +18,7 @@ public class Whitelist {
     private final Path whitelistPath;
     private WhitelistRepository repository;
     
-    // Для обратной совместимости с существующим кодом
-    @Getter
+    // Для обратной совместимости с существующим кодом - только для инициализации
     private List<String> whitelist = new ArrayList<>();
 
     public Whitelist(VelocityCoolList plugin) {
@@ -38,8 +36,8 @@ public class Whitelist {
     }
 
     public void reload() {
-        // Обновляем локальный список для обратной совместимости
-        this.whitelist = repository.getAllPlayers();
+        // Перезагрузка теперь не требуется, так как данные всегда актуальные из БД
+        VelocityCoolList.LOGGER.info("Whitelist перезагружен (данные всегда актуальные из БД)");
     }
 
     private void loadWhitelist() {
@@ -64,34 +62,28 @@ public class Whitelist {
     }
 
     public void clear() {
-        if (repository.clear()) {
-            this.whitelist.clear();
-        }
+        repository.clear();
     }
 
     public void removePlayer(String nickname) {
-        if (repository.removePlayer(nickname)) {
-            // Обновляем локальный список для обратной совместимости
-            String lowercaseNickname = nickname.toLowerCase();
-            this.whitelist.removeIf(player -> player.toLowerCase().equals(lowercaseNickname));
-        }
+        repository.removePlayer(nickname);
     }
 
     public void addPlayer(String nickname) {
-        if (repository.addPlayer(nickname)) {
-            // Обновляем локальный список для обратной совместимости
-            String lowercaseNickname = nickname.toLowerCase();
-            boolean alreadyExists = this.whitelist.stream()
-                    .anyMatch(player -> player.toLowerCase().equals(lowercaseNickname));
-            
-            if (!alreadyExists) {
-                this.whitelist.add(nickname);
-            }
-        }
+        repository.addPlayer(nickname);
     }
 
     public boolean contains(String nickname) {
         return repository.contains(nickname);
+    }
+    
+    public List<String> getActualWhitelist() {
+        return repository.getAllPlayers();
+    }
+    
+    public List<String> getWhitelist() {
+        // Возвращаем актуальные данные из БД для полной совместимости
+        return repository.getAllPlayers();
     }
 
     public void saveFile() {
@@ -120,9 +112,9 @@ public class Whitelist {
             migrateFromJson();
         }
         
-        // Обновляем локальный список для обратной совместимости
-        this.whitelist = repository.getAllPlayers();
-        VelocityCoolList.LOGGER.info("Whitelist загружен: {} игроков", whitelist.size());
+        // Выводим информацию о количестве игроков
+        int playerCount = repository.getAllPlayers().size();
+        VelocityCoolList.LOGGER.info("Whitelist загружен: {} игроков", playerCount);
     }
     
     private void migrateFromJson() {

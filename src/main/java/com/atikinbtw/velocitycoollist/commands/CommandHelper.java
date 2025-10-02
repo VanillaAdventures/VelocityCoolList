@@ -9,6 +9,8 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
+import java.util.List;
+
 public final class CommandHelper {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
@@ -137,7 +139,10 @@ public final class CommandHelper {
     public static int list(CommandContext<CommandSource> context) {
         CommandSource source = context.getSource();
 
-        if (Whitelist.getInstance().isWhitelistEmpty()) {
+        // Получаем актуальные данные из БД
+        List<String> actualWhitelist = Whitelist.getInstance().getActualWhitelist();
+        
+        if (actualWhitelist.isEmpty()) {
             source.sendMessage(MINI_MESSAGE.deserialize(Config.getInstance().getString("prefix") + " " + replacePlaceholders(Config.getInstance().getMessage("list_no_players"), 
                     "$SOURCE", getSourceName(source))));
             return Command.SINGLE_SUCCESS;
@@ -146,8 +151,8 @@ public final class CommandHelper {
         source.sendMessage(MINI_MESSAGE.deserialize(Config.getInstance().getString("prefix") + " " +
                         replacePlaceholders(Config.getInstance().getMessage("list"),
                                 "$SOURCE", getSourceName(source),
-                                "$WHITELIST_SIZE", String.valueOf(Whitelist.getInstance().getWhitelist().size()),
-                                "$WHITELIST", String.join(", ", Whitelist.getInstance().getWhitelist())
+                                "$WHITELIST_SIZE", String.valueOf(actualWhitelist.size()),
+                                "$WHITELIST", String.join(", ", actualWhitelist)
                         )
                 )
         );
